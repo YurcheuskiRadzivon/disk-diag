@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 	"os"
 	"os/signal"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/config"
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/server"
+	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/base"
 )
 
 func main() {
@@ -15,12 +17,22 @@ func main() {
 	if err != nil {
 		log.Fatalf("Config error: %s", err)
 	}
-	run(cfg)
+
+	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer cancel()
+
+	run(cfg, ctx)
 }
 
-func run(cfg *config.Config) {
+func run(cfg *config.Config, ctx context.Context) {
+	base, err := base.NewService(ctx)
+	if err != nil {
+		log.Fatalf("Base: %v", err)
+	}
 
-	srv := server.New(cfg.HTTP.PORT)
+	srv := server.New(cfg.HTTP.PORT, base)
+
+	srv.RegisterRoutes()
 
 	srv.Start()
 
@@ -32,11 +44,11 @@ func run(cfg *config.Config) {
 		log.Println("Shutdown")
 
 	case err := <-srv.Notify():
-		log.Panicf("Httpserver: %s", err)
+		log.Panicf("server: %s", err)
 	}
 
-	err := srv.Shutdown()
+	err = srv.Shutdown()
 	if err != nil {
-		log.Fatalf("Httpserver: %v", err)
+		log.Fatalf("server: %v", err)
 	}
 }

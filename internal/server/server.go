@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/base"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -15,16 +16,22 @@ const (
 )
 
 type Server struct {
-	App     *fiber.App
+	app     *fiber.App
 	notify  chan error
 	address string
+	base    base.Service
 }
 
-func New(port string) *Server {
+type Error struct {
+	Message string `json:"message" example:"message"`
+}
+
+func New(port string, base base.Service) *Server {
 	s := &Server{
-		App:     nil,
+		app:     nil,
 		notify:  make(chan error, 1),
 		address: port,
+		base:    base,
 	}
 
 	app := fiber.New(fiber.Config{
@@ -35,16 +42,24 @@ func New(port string) *Server {
 		JSONDecoder:  json.Unmarshal,
 	})
 
-	s.App = app
+	s.app = app
 
 	return s
 }
 
 func (s *Server) Start() {
 	go func() {
-		s.notify <- s.App.Listen(s.address)
+		s.notify <- s.app.Listen(s.address)
 		close(s.notify)
 	}()
+}
+
+func (s *Server) RegisterRoutes() {
+	base := s.app.Group("/base")
+	{
+		base.Get("/disks", s.handleDisks)
+		base.Get("/partitions/:id", s.handlePartitions)
+	}
 }
 
 func (s *Server) Notify() <-chan error {
@@ -52,5 +67,9 @@ func (s *Server) Notify() <-chan error {
 }
 
 func (s *Server) Shutdown() error {
-	return s.App.ShutdownWithTimeout(_defaultShutdownTimeout)
+	return s.app.ShutdownWithTimeout(_defaultShutdownTimeout)
+}
+
+func ErrorResponse(ctx *fiber.Ctx, code int, msg string) error {
+	return ctx.Status(code).JSON(Error{Message: msg})
 }
