@@ -58,7 +58,9 @@ func (s *Server) RegisterRoutes() {
 	base := s.app.Group("/base")
 	{
 		base.Get("/disks", s.handleDisks)
+		base.Get("/cdiskinfo/:id", s.handleCDiskInfo)
 		base.Get("/partitions/:id", s.handlePartitions)
+
 	}
 }
 

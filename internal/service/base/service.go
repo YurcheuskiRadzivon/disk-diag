@@ -12,6 +12,7 @@ import (
 type Service interface {
 	GetPhysicalDisks() ([]models.DiskInfo, error)
 	GetExtendedPartitions(diskIndex int) ([]models.PartitionInfo, error)
+	GetCDiskInfo(diskIndex int) (models.CDiskInfo, error)
 }
 
 type service struct {

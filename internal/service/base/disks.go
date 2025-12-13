@@ -1,9 +1,19 @@
 package base
 
+/*
+#cgo CFLAGS: -Wall
+#cgo LDFLAGS: -lkernel32
+#include "diskinfo.h"
+#include <stdlib.h>
+*/
+import "C"
+
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
+	"unsafe"
 
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/models"
 )
@@ -70,4 +80,21 @@ func (s *service) GetPhysicalDisks() ([]models.DiskInfo, error) {
 		disks = append(disks, disk)
 	}
 	return disks, nil
+}
+
+func (s *service) GetCDiskInfo(diskIndex int) (models.CDiskInfo, error) {
+	info := C.get_physicaldrive_info_struct_c(C.int(diskIndex))
+	if info == nil {
+		return models.CDiskInfo{}, errors.New("failed to get storage device info")
+	}
+	defer C.free(unsafe.Pointer(info))
+
+	device := models.CDiskInfo{
+		BusType:          int32(info.busType),
+		CommandQueueing:  info.commandQueueing != 0,
+		MaxTransferBytes: uint32(info.maxTransfer),
+		BytesPerSector:   uint32(info.bytesPerSector),
+	}
+
+	return device, nil
 }

@@ -22,3 +22,10 @@ func (s *Server) handlePartitions(ctx *fiber.Ctx) error {
 
 	return ctx.Status(http.StatusOK).JSON(parts)
 }
+
+func (s *Server) handleCDiskInfo(ctx *fiber.Ctx) error {
+	id, _ := strconv.Atoi(ctx.Params("id"))
+	cDiskInfo, _ := s.base.GetCDiskInfo(id)
+
+	return ctx.Status(http.StatusOK).JSON(cDiskInfo)
+}

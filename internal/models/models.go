@@ -16,6 +16,13 @@ type DiskInfo struct {
 	PartitionsCount int    `json:"partitionsCount"`
 }
 
+type CDiskInfo struct {
+	BusType          int32
+	CommandQueueing  bool
+	MaxTransferBytes uint32
+	BytesPerSector   uint32
+}
+
 type PartitionInfo struct {
 	DiskIndex          int    `json:"diskIndex"`
 	PartitionID        string `json:"partitionId"`
