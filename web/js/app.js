@@ -185,12 +185,40 @@ document.addEventListener('DOMContentLoaded', () => {
             // Merge info
             const fullInfo = { ...diskBasic, ...cInfo };
 
+            // Tooltips for disk info fields (Russian)
+            const diskInfoTooltips = {
+                index: "Внутренний индекс диска в системе",
+                model: "Модель накопителя",
+                serialNumber: "Серийный номер устройства",
+                size: "Общий размер накопителя в байтах",
+                sectorSize: "Размер сектора в байтах",
+                mediaType: "Тип носителя (SSD/HDD)",
+                busType: "Тип шины подключения (SATA/NVMe/USB)",
+                firmwareRevision: "Версия прошивки накопителя",
+                partitionStyle: "Стиль разметки (GPT/MBR)",
+                healthStatus: "Общее состояние здоровья диска",
+                operationalStatus: "Операционный статус устройства",
+                temperature: "Текущая температура накопителя",
+                controllerPath: "Путь контроллера в системе",
+                name: "Название устройства",
+                manufacturer: "Производитель",
+                interfaceType: "Тип интерфейса подключения",
+                totalCylinders: "Общее количество цилиндров",
+                totalHeads: "Общее количество головок",
+                totalSectors: "Общее количество секторов",
+                totalTracks: "Общее количество дорожек",
+                tracksPerCylinder: "Дорожек на цилиндр",
+                sectorsPerTrack: "Секторов на дорожку",
+                bytesPerSector: "Байт на сектор"
+            };
+
             let html = `<h3>Basic Information</h3>`;
             html += `<table class="smart-table">`;
             for (const [key, value] of Object.entries(fullInfo)) {
                 // Skip complex objects or large arrays if any
                 if (typeof value === 'object' && value !== null) continue;
-                html += `<tr><td><strong>${key}</strong></td><td>${value}</td></tr>`;
+                const tooltip = diskInfoTooltips[key] || key;
+                html += `<tr title="${tooltip}"><td><strong>${key}</strong></td><td>${value}</td></tr>`;
             }
             html += `</table>`;
 
@@ -308,14 +336,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>`;
             }
 
-            // Metrics HTML with tooltips
+            // Metrics HTML with tooltips (Russian)
             const tooltips = {
-                temperature_c: "Current temperature of the drive in Celsius",
-                life_remaining_percent: "Estimated remaining lifespan of the SSD as a percentage",
-                data_written_tb: "Total amount of data written to the drive in Terabytes",
-                power_on_hours: "Total hours the drive has been powered on",
-                media_errors: "Number of unrecoverable media/data integrity errors",
-                unsafe_shutdowns: "Number of unexpected power loss events"
+                temperature_c: "Текущая температура накопителя в градусах Цельсия",
+                life_remaining_percent: "Оставшийся ресурс SSD в процентах",
+                data_written_tb: "Общий объём записанных данных в терабайтах",
+                power_on_hours: "Общее время работы накопителя в часах",
+                media_errors: "Количество неисправимых ошибок носителя",
+                unsafe_shutdowns: "Количество небезопасных отключений питания"
             };
 
             let metricsHtml = '';
