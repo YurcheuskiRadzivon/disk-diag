@@ -202,16 +202,80 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch(endpoint);
             if (!response.ok) throw new Error('Diagnostic failed');
-            // The response might be text or JSON. 
             const text = await response.text();
 
-            // Try to parse as JSON to format nicely, otherwise show text
+            let data;
             try {
-                const json = JSON.parse(text);
-                resultContainer.textContent = JSON.stringify(json, null, 2);
+                data = JSON.parse(text);
             } catch (e) {
                 resultContainer.textContent = text;
+                return;
             }
+
+            // Status class mapping
+            const statusLower = (data.status || 'unknown').toLowerCase();
+            let statusClass = 'status-unknown';
+            if (statusLower === 'ok' || statusLower === 'good' || statusLower === 'healthy') statusClass = 'status-ok';
+            else if (statusLower === 'warning') statusClass = 'status-warning';
+            else if (statusLower === 'critical' || statusLower === 'error' || statusLower === 'bad') statusClass = 'status-critical';
+
+            // Problems HTML
+            let problemsHtml = '';
+            if (data.problems && data.problems.length > 0) {
+                problemsHtml = `<div class="diag-section">
+                    <div class="diag-section-title">Problems Found</div>
+                    <ul class="diag-problems">${data.problems.map(p => `<li>${p}</li>`).join('')}</ul>
+                </div>`;
+            }
+
+            // Metrics HTML with tooltips
+            const tooltips = {
+                temperature_c: "Current temperature of the drive in Celsius",
+                life_remaining_percent: "Estimated remaining lifespan of the SSD as a percentage",
+                data_written_tb: "Total amount of data written to the drive in Terabytes",
+                power_on_hours: "Total hours the drive has been powered on",
+                media_errors: "Number of unrecoverable media/data integrity errors",
+                unsafe_shutdowns: "Number of unexpected power loss events"
+            };
+
+            let metricsHtml = '';
+            if (data.metrics) {
+                metricsHtml = `<div class="diag-section">
+                    <div class="diag-section-title">Key Metrics</div>
+                    <div class="diag-metrics">
+                        ${Object.entries(data.metrics).map(([key, value]) => `
+                            <div class="metric-card" title="${tooltips[key] || key.replace(/_/g, ' ')}">
+                                <div class="metric-value">${value}</div>
+                                <div class="metric-label">${key.replace(/_/g, ' ')}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            }
+
+            const html = `
+                <div class="diag-card">
+                    <div class="diag-header">
+                        <span class="diag-method">${data.method || 'Diagnostic'}</span>
+                        <span class="diag-status ${statusClass}">${data.status || 'Unknown'}</span>
+                    </div>
+                    
+                    <div class="diag-score">
+                        <span class="score-value">${data.health_score || 0}</span>
+                        <span class="score-label">/ 100 Health Score</span>
+                    </div>
+
+                    <div class="diag-summary">
+                        <div class="diag-section-title">Summary</div>
+                        <p>${data.summary || 'No summary available.'}</p>
+                    </div>
+
+                    ${problemsHtml}
+                    ${metricsHtml}
+                </div>
+            `;
+
+            resultContainer.innerHTML = html;
 
         } catch (error) {
             resultContainer.innerHTML = `<p class="error">Error: ${error.message}</p>`;
