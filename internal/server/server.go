@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/base"
+	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/smart"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -20,18 +21,20 @@ type Server struct {
 	notify  chan error
 	address string
 	base    base.Service
+	smart   smart.Service
 }
 
 type Error struct {
 	Message string `json:"message" example:"message"`
 }
 
-func New(port string, base base.Service) *Server {
+func New(port string, base base.Service, smart smart.Service) *Server {
 	s := &Server{
 		app:     nil,
 		notify:  make(chan error, 1),
 		address: port,
 		base:    base,
+		smart:   smart,
 	}
 
 	app := fiber.New(fiber.Config{
@@ -60,6 +63,12 @@ func (s *Server) RegisterRoutes() {
 		base.Get("/disks", s.handleDisks)
 		base.Get("/cdiskinfo/:id", s.handleCDiskInfo)
 		base.Get("/partitions/:id", s.handlePartitions)
+
+	}
+
+	smart := s.app.Group("/smart")
+	{
+		smart.Get("/:id", s.handlerSmartInfo)
 
 	}
 }

@@ -18,14 +18,20 @@ func (s *Server) handleDisks(ctx *fiber.Ctx) error {
 
 func (s *Server) handlePartitions(ctx *fiber.Ctx) error {
 	id, _ := strconv.Atoi(ctx.Params("id"))
-	parts, _ := s.base.GetExtendedPartitions(id)
+	parts, err := s.base.GetExtendedPartitions(id)
+	if err != nil {
+		return ErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	}
 
 	return ctx.Status(http.StatusOK).JSON(parts)
 }
 
 func (s *Server) handleCDiskInfo(ctx *fiber.Ctx) error {
 	id, _ := strconv.Atoi(ctx.Params("id"))
-	cDiskInfo, _ := s.base.GetCDiskInfo(id)
+	cDiskInfo, err := s.base.GetCDiskInfo(id)
+	if err != nil {
+		return ErrorResponse(ctx, http.StatusBadRequest, err.Error())
+	}
 
 	return ctx.Status(http.StatusOK).JSON(cDiskInfo)
 }
