@@ -8,6 +8,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.10
 	github.com/google/generative-ai-go v0.20.1
 	github.com/joho/godotenv v1.5.1
+	github.com/jung-kurt/gofpdf v1.16.2
 	google.golang.org/api v0.257.0
 )
 

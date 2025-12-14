@@ -43,9 +43,26 @@
             <!-- Tab 1: Disks & Partitions -->
             <section id="disks" class="tab-content active">
                 <div class="card">
-                    <h2>System Disks</h2>
+                    <div class="card-header">
+                        <h2>System Disks</h2>
+                        <div class="export-dropdown">
+                            <button class="btn export-btn" onclick="toggleExportMenu('disks')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Export
+                            </button>
+                            <div class="dropdown-content" id="export-menu-disks">
+                                <a href="#" onclick="exportData('disks', 'json')">JSON</a>
+                                <a href="#" onclick="exportData('disks', 'txt')">TXT</a>
+                                <a href="#" onclick="exportData('disks', 'pdf')">PDF</a>
+                            </div>
+                        </div>
+                    </div>
                     <div id="disk-list" class="disk-list">
-                        <!-- Disks will be populated here -->
                         <div class="loading">Loading disks...</div>
                     </div>
                 </div>
@@ -55,7 +72,25 @@
             <section id="smart" class="tab-content">
                 <div class="vertical-layout">
                     <div class="card">
-                        <h2>SMART Information (Disk 0)</h2>
+                        <div class="card-header">
+                            <h2>SMART Information (Disk 0)</h2>
+                            <div class="export-dropdown">
+                                <button class="btn export-btn" onclick="toggleExportMenu('smart')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="7 10 12 15 17 10"></polyline>
+                                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                                    </svg>
+                                    Export
+                                </button>
+                                <div class="dropdown-content" id="export-menu-smart">
+                                    <a href="#" onclick="exportData('smart', 'json')">JSON</a>
+                                    <a href="#" onclick="exportData('smart', 'txt')">TXT</a>
+                                    <a href="#" onclick="exportData('smart', 'pdf')">PDF</a>
+                                </div>
+                            </div>
+                        </div>
                         <div id="smart-data" class="scrollable-content">
                             <div class="loading">Loading SMART data...</div>
                         </div>
@@ -76,7 +111,25 @@
             <!-- Tab 3: Benchmarks -->
             <section id="benchmarks" class="tab-content">
                 <div class="card">
-                    <h2>Disk Benchmark (Disk 0)</h2>
+                    <div class="card-header">
+                        <h2>Disk Benchmark (Disk 0)</h2>
+                        <div class="export-dropdown">
+                            <button class="btn export-btn" onclick="toggleExportMenu('benchmarks')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Export
+                            </button>
+                            <div class="dropdown-content" id="export-menu-benchmarks">
+                                <a href="#" onclick="exportData('benchmarks', 'json')">JSON</a>
+                                <a href="#" onclick="exportData('benchmarks', 'txt')">TXT</a>
+                                <a href="#" onclick="exportData('benchmarks', 'pdf')">PDF</a>
+                            </div>
+                        </div>
+                    </div>
                     <form id="benchmark-form">
                         <div class="form-grid">
                             <div class="form-group">

@@ -9,6 +9,7 @@ import (
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/base"
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/benchmark"
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/diagnostic"
+	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/export"
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/smart"
 	"github.com/YurcheuskiRadzivon/disk-diag/web"
 	"github.com/gofiber/fiber/v2"
@@ -30,6 +31,7 @@ type Server struct {
 	smart      smart.Service
 	benchmark  benchmark.Service
 	diagnostic diagnostic.Service
+	export     export.Service
 }
 
 type Error struct {
@@ -45,6 +47,7 @@ func New(port string, base base.Service, smart smart.Service, benchmark benchmar
 		smart:      smart,
 		benchmark:  benchmark,
 		diagnostic: diagnostic,
+		export:     export.New(),
 	}
 
 	app := fiber.New(fiber.Config{
@@ -103,6 +106,11 @@ func (s *Server) RegisterRoutes() {
 	{
 		diagnostic.Get("/gemini/:id", s.handlerDiagnosticGeminiInfo)
 		diagnostic.Get("/diagnostic/:id", s.handlerDiagnosticManualInfo)
+	}
+
+	exportGroup := s.app.Group("/export")
+	{
+		exportGroup.Post("/", s.handlerExport)
 	}
 
 }

@@ -1,3 +1,77 @@
+// Global data storage for export
+let cachedDisksData = null;
+let cachedSmartData = null;
+let cachedDiagnosticData = null;
+let cachedBenchmarkData = null;
+
+// Export menu toggle
+function toggleExportMenu(tab) {
+    const menu = document.getElementById(`export-menu-${tab}`);
+    document.querySelectorAll('.dropdown-content').forEach(m => {
+        if (m !== menu) m.classList.remove('show');
+    });
+    menu.classList.toggle('show');
+}
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.export-dropdown')) {
+        document.querySelectorAll('.dropdown-content').forEach(m => m.classList.remove('show'));
+    }
+});
+
+// Export data function
+async function exportData(tab, format) {
+    let data = null;
+    let title = '';
+
+    switch (tab) {
+        case 'disks':
+            data = cachedDisksData;
+            title = 'Disks and Partitions Report';
+            break;
+        case 'smart':
+            data = { smart: cachedSmartData, diagnostic: cachedDiagnosticData };
+            title = 'SMART and Diagnostics Report';
+            break;
+        case 'benchmarks':
+            data = cachedBenchmarkData;
+            title = 'Benchmark Results Report';
+            break;
+    }
+
+    if (!data) {
+        alert('No data available for export. Please load the data first.');
+        return;
+    }
+
+    try {
+        const response = await fetch('/export/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data, title, format })
+        });
+
+        if (!response.ok) throw new Error('Export failed');
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `export.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+    } catch (error) {
+        alert(`Export error: ${error.message}`);
+    }
+
+    // Close menu
+    document.querySelectorAll('.dropdown-content').forEach(m => m.classList.remove('show'));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     // Tab Switching Logic
     const tabs = document.querySelectorAll('.tab-btn');
@@ -30,6 +104,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/base/disks');
             if (!response.ok) throw new Error('Failed to fetch disks');
             const disks = await response.json();
+
+            // Cache for export
+            cachedDisksData = { disks: disks, partitions: [] };
 
             diskList.innerHTML = '';
 
@@ -180,6 +257,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Failed to fetch SMART data');
             const data = await response.json();
 
+            // Cache for export
+            cachedSmartData = data;
+
             // Display as formatted JSON
             container.innerHTML = `<pre class="json-view">${JSON.stringify(data, null, 2)}</pre>`;
 
@@ -277,6 +357,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             resultContainer.innerHTML = html;
 
+            // Cache for export
+            cachedDiagnosticData = data;
+
         } catch (error) {
             resultContainer.innerHTML = `<p class="error">Error: ${error.message}</p>`;
         }
@@ -331,6 +414,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error('Benchmark failed');
 
             const result = await response.json(); // Assuming JSON response
+
+            // Cache for export
+            cachedBenchmarkData = result;
 
             clearInterval(interval);
             progressBar.style.width = '100%';
