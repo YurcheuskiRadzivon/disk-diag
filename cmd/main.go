@@ -11,6 +11,7 @@ import (
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/server"
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/base"
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/benchmark"
+	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/diagnostic"
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/smart"
 )
 
@@ -42,7 +43,13 @@ func run(cfg *config.Config, ctx context.Context) {
 		log.Fatalf("Benchmark: %v", err)
 	}
 
-	srv := server.New(cfg.HTTP.PORT, base, smart, benchmark)
+	diagnostic, err := diagnostic.NewService(ctx, cfg.DIAGNOSTIC.API_KEY)
+	if err != nil {
+		log.Fatalf("Diagnosis: %v", err)
+	}
+	defer diagnostic.Close()
+
+	srv := server.New(cfg.HTTP.PORT, base, smart, benchmark, diagnostic)
 
 	srv.RegisterRoutes()
 

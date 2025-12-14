@@ -6,6 +6,7 @@ import (
 
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/base"
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/benchmark"
+	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/diagnostic"
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/smart"
 	"github.com/gofiber/fiber/v2"
 )
@@ -18,26 +19,28 @@ const (
 )
 
 type Server struct {
-	app       *fiber.App
-	notify    chan error
-	address   string
-	base      base.Service
-	smart     smart.Service
-	benchmark benchmark.Service
+	app        *fiber.App
+	notify     chan error
+	address    string
+	base       base.Service
+	smart      smart.Service
+	benchmark  benchmark.Service
+	diagnostic diagnostic.Service
 }
 
 type Error struct {
 	Message string `json:"message" example:"message"`
 }
 
-func New(port string, base base.Service, smart smart.Service, benchmark benchmark.Service) *Server {
+func New(port string, base base.Service, smart smart.Service, benchmark benchmark.Service, diagnostic diagnostic.Service) *Server {
 	s := &Server{
-		app:       nil,
-		notify:    make(chan error, 1),
-		address:   port,
-		base:      base,
-		smart:     smart,
-		benchmark: benchmark,
+		app:        nil,
+		notify:     make(chan error, 1),
+		address:    port,
+		base:       base,
+		smart:      smart,
+		benchmark:  benchmark,
+		diagnostic: diagnostic,
 	}
 
 	app := fiber.New(fiber.Config{
@@ -82,6 +85,13 @@ func (s *Server) RegisterRoutes() {
 		benchmark.Get("/iops/:id", s.handlerBenchmarkIOPSInfo)
 
 	}
+
+	diagnostic := s.app.Group("/diagnostic")
+	{
+		diagnostic.Get("/gemini/:id", s.handlerDiagnosticGeminiInfo)
+		diagnostic.Get("/diagnostic/:id", s.handlerDiagnosticManualInfo)
+	}
+
 }
 
 func (s *Server) Notify() <-chan error {

@@ -7,11 +7,16 @@ import (
 
 type (
 	Config struct {
-		HTTP HTTP
+		HTTP       HTTP
+		DIAGNOSTIC DIAGNOSTIC
 	}
 
 	HTTP struct {
 		PORT string `env:"HTTP_PORT,required"`
+	}
+
+	DIAGNOSTIC struct {
+		API_KEY string `env:"API_KEY_GEMINI,required"`
 	}
 )
 
