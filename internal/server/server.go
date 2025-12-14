@@ -4,11 +4,15 @@ import (
 	"encoding/json"
 	"time"
 
+	"net/http"
+
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/base"
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/benchmark"
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/diagnostic"
 	"github.com/YurcheuskiRadzivon/disk-diag/internal/service/smart"
+	"github.com/YurcheuskiRadzivon/disk-diag/web"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/filesystem"
 )
 
 const (
@@ -64,6 +68,15 @@ func (s *Server) Start() {
 }
 
 func (s *Server) RegisterRoutes() {
+	ui := s.app.Group("/ui")
+	{
+		ui.Use("/", filesystem.New(filesystem.Config{
+			Root:       http.FS(web.Assets),
+			PathPrefix: "",
+			Browse:     true,
+		}))
+	}
+
 	base := s.app.Group("/base")
 	{
 		base.Get("/disks", s.handleDisks)
