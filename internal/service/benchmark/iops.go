@@ -60,6 +60,15 @@ func (s *service) IOPSTest(diskIndex int, cfg *models.TestConfig) (*models.IOPST
 
 	log.Printf("%v", cfg)
 
+	cfg.Balloon = false
+
+	if cfg.Balloon {
+		err = s.Balloon()
+		if err != nil {
+			return nil, fmt.Errorf("balloon failed - %w", err)
+		}
+	}
+
 	wtr := models.IOPSTestResult{}
 
 	wtr.CPUNum = runtime.NumCPU()

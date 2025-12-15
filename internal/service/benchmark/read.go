@@ -53,6 +53,15 @@ func (s *service) ReadTest(diskIndex int, cfg *models.TestConfig) (*models.ReadT
 		cfg.Seconds = 300
 	}
 
+	cfg.Balloon = false
+
+	if cfg.Balloon {
+		err = s.Balloon()
+		if err != nil {
+			return nil, fmt.Errorf("balloon failed - %w", err)
+		}
+	}
+
 	wtr := models.ReadTestResult{}
 
 	wtr.CPUNum = runtime.NumCPU()
